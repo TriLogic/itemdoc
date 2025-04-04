@@ -82,7 +82,7 @@ impl ItemOutput for JSONFormatCompact {
     }
     fn hash_begin_next(&mut self, key: &String) -> Result<(), OutputError> {
         if !self.context.is_first() {
-            self.writer.write(CHRB_COMMA_C)?; 
+            self.writer.write_all(CHRB_COMMA_C)?; 
         }
         self.hash_write_key(key)?;
         self.writer.write_all(CHRB_COLON_C)?;
@@ -90,8 +90,8 @@ impl ItemOutput for JSONFormatCompact {
     }
     fn hash_write_key(&mut self, key: &String) -> Result<(), OutputError> { 
         let enclosed = make_quoted_string(key);
-        self.writer.write(enclosed.as_bytes())?;
-        self.writer.write(CHRB_COLON_C)?;
+        self.writer.write_all(enclosed.as_bytes())?;
+        self.writer.write_all(CHRB_COLON_C)?;
         Ok(())
     }
     fn hash_write_null(&mut self, key: &String) -> Result<(), OutputError> { 
