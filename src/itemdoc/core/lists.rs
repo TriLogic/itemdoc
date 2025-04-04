@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use super::item_type::*;
+use super::items::*;
 
 #[derive(PartialEq)]
 pub struct ItemList {
@@ -25,45 +25,45 @@ impl ItemList {
 
     fn add_item(&mut self, item: ItemType, key: Option<String>) -> Result<(), Box<dyn Error>> {
         if key.is_some() {
-            return Err(Box::new(ThingError::NotAnItemHash));
+            return Err(Box::new(ItemError::NotAnItemHash));
         }
         self.items.push(item);
         Ok(())
     }
 
     pub fn add_null(&mut self, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::item_null::ItemNull::new(), key)?;
+        self.add_item(super::nulls::ItemNull::new(), key)?;
         Ok(self)
     }
     pub fn add_boolean(&mut self, value: Option<bool>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::item_boolean::ItemBoolean::new(value), key)?;
+        self.add_item(super::booleans::ItemBoolean::new(value), key)?;
         Ok(self)
     }
     pub fn add_number(&mut self, value: Option<f64>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::item_number::ItemNumber::new(value), key)?;
+        self.add_item(super::numbers::ItemNumber::new(value), key)?;
         Ok(self)
     }
     pub fn add_string(&mut self, value: Option<String>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::item_string::ItemString::new(value), key)?;
+        self.add_item(super::strings::ItemString::new(value), key)?;
         Ok(self)
     }
     pub fn add_list(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
         if key.is_some() {
-            return Err(Box::new(ThingError::NotAnItemHash));
+            return Err(Box::new(ItemError::NotAnItemHash));
         }
         let list = ItemList::new();
         self.items.push(list);
         self.items.last_mut()
-            .ok_or_else(|| Box::<dyn Error>::from(ThingError::ItemAdditionFailed))
+            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
     }
     pub fn add_hash(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
         if key.is_some() {
-            return Err(Box::new(ThingError::NotAnItemHash));
+            return Err(Box::new(ItemError::NotAnItemHash));
         }
-        let hash = super::item_hash::ItemHash::new();
+        let hash = super::hashes::ItemHash::new();
         self.items.push(hash);
         self.items.last_mut()
-            .ok_or_else(|| Box::<dyn Error>::from(ThingError::ItemAdditionFailed))
+            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
     }
 
     pub fn count(&self) -> usize { 
@@ -84,7 +84,7 @@ impl ItemList {
         Ok(self.items.iter().position(|value| value == item))
     }
     pub fn key_of_item(&self, _item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
-        Err(Box::new(ThingError::NotAnItemHash))
+        Err(Box::new(ItemError::NotAnItemHash))
     }
 
     pub fn get_indices(&self) -> Option<Box<dyn Iterator<Item = usize> + '_>> {
@@ -98,7 +98,7 @@ impl ItemList {
         Ok(self.items.get(_index))
     }
     pub fn item_by_key(&self, _key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemHash))
+        Err(Box::new(ItemError::NotAnItemHash))
     }
 
     pub fn to_string(&self) -> String {

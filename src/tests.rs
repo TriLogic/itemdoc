@@ -1,9 +1,9 @@
 #[cfg(test)]
 mod tests {
 
-    use crate::itemdoc::item_list::*;
-    use crate::itemdoc::item_hash::*;
-    use crate::itemdoc::item_type::ItemType;
+    use crate::itemdoc::core::lists::*;
+    use crate::itemdoc::core::hashes::*;
+    use crate::itemdoc::core::items::ItemType;
 
     #[test]
     fn test_add_null_to_item_list() {

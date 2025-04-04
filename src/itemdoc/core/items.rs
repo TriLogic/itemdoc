@@ -4,34 +4,34 @@ use std::fmt;
 
 #[derive(Debug)]
 #[derive(Copy, Clone)]
-pub enum ThingError {
+pub enum ItemError {
     NotAnItemList,
     NotAnItemHash,
     NotAnItemContainer,
     ItemAdditionFailed,
 }
 
-impl fmt::Display for ThingError {
+impl fmt::Display for ItemError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ThingError::NotAnItemList => write!(f, "Not an item list!"),
-            ThingError::NotAnItemHash => write!(f, "Not an item hash!"),
-            ThingError::NotAnItemContainer => write!(f, "Not an item container!"),
-            ThingError::ItemAdditionFailed => write!(f, "Item addition failure!")
+            ItemError::NotAnItemList => write!(f, "Not an item list!"),
+            ItemError::NotAnItemHash => write!(f, "Not an item hash!"),
+            ItemError::NotAnItemContainer => write!(f, "Not an item container!"),
+            ItemError::ItemAdditionFailed => write!(f, "Item addition failure!")
         }
     }
 }
 
-impl std::error::Error for ThingError {}
+impl std::error::Error for ItemError {}
 
 #[derive(PartialEq)]
 pub enum ItemType {
-    TNull(super::item_null::ItemNull),
-    TBoolean(super::item_boolean::ItemBoolean),
-    TNumber(super::item_number::ItemNumber),
-    TString(super::item_string::ItemString),
-    TList(super::item_list::ItemList),
-    THash(super::item_hash::ItemHash),
+    TNull(super::nulls::ItemNull),
+    TBoolean(super::booleans::ItemBoolean),
+    TNumber(super::numbers::ItemNumber),
+    TString(super::strings::ItemString),
+    TList(super::lists::ItemList),
+    THash(super::hashes::ItemHash),
 }
 
 impl ItemType {
@@ -40,35 +40,35 @@ impl ItemType {
         match self {
             ItemType::TList(me) => { me.add_null(key)?; Ok(self) },
             ItemType::THash(me) => { me.add_null(key)?; Ok(self) },
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
     pub fn add_boolean(&mut self, value: Option<bool>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
         match self {
             ItemType::TList(me) => { me.add_boolean(value, key)?; Ok(self) },
             ItemType::THash(me) => { me.add_boolean(value, key)?; Ok(self) },
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
     pub fn add_number(&mut self, value: Option<f64>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
         match self {
             ItemType::TList(me) => { me.add_number(value, key)?; Ok(self) },
             ItemType::THash(me) => { me.add_number(value, key)?; Ok(self) },
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
     pub fn add_string(&mut self, value: Option<String>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
         match self {
             ItemType::TList(me) => { me.add_string(value, key)?; Ok(self) },
             ItemType::THash(me) => { me.add_string(value, key)?; Ok(self) },
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
     pub fn add_list(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
         match self {
             ItemType::TList(list) => list.add_list(key),
             ItemType::THash(hash) => hash.add_list(key),
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
 
@@ -76,7 +76,7 @@ impl ItemType {
         match self {
             ItemType::TList(list) => list.add_hash(key),
             ItemType::THash(hash) => hash.add_hash(key),
-            _ => Err(Box::new(ThingError::NotAnItemContainer)),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
 
@@ -180,26 +180,26 @@ impl ItemType {
     pub fn index_of_item(&self, item: &ItemType) -> Result<Option<usize>, Box<dyn Error>> { 
         match self {
             ItemType::TList(mapped) => mapped.index_of_item(item),
-            _ => Err(Box::new(ThingError::NotAnItemList)),
+            _ => Err(Box::new(ItemError::NotAnItemList)),
         }        
     }
     pub fn key_of_item(&self, item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
         match self {
             ItemType::THash(mapped) => mapped.key_of_item(item),
-            _ => Err(Box::new(ThingError::NotAnItemHash)),
+            _ => Err(Box::new(ItemError::NotAnItemHash)),
         }
     }
 
     pub fn item_by_index(&self, index: usize) -> Result<Option<&ItemType>, Box<dyn Error>> {
         match self {
             ItemType::TList(mapped) => mapped.item_by_index(index),
-            _ => Err(Box::new(ThingError::NotAnItemList)),
+            _ => Err(Box::new(ItemError::NotAnItemList)),
         }        
     }
     pub fn item_by_key(&self, key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
         match self {
             ItemType::THash(mapped) => mapped.item_by_key(key),
-            _ => Err(Box::new(ThingError::NotAnItemHash)),
+            _ => Err(Box::new(ItemError::NotAnItemHash)),
         }        
     }
 

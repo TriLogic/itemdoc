@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use super::item_type::*;
+use super::items::*;
 
 #[derive(PartialEq)]
 pub struct ItemBoolean {
@@ -17,22 +17,22 @@ impl ItemBoolean {
     }
 
     pub fn add_null(&mut self, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
     pub fn add_boolean(&mut self, _value: Option<f64>, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
     pub fn add_number(&mut self, _value: Option<f64>, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
     pub fn add_string(&mut self, _value: Option<String>, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
     pub fn add_list(&mut self, _key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
     pub fn add_hash(&mut self, _key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemContainer))
+        Err(Box::new(ItemError::NotAnItemContainer))
     }
 
     pub fn is_null(&self) -> bool { false }
@@ -49,16 +49,16 @@ impl ItemBoolean {
     pub fn get_keys(&self) -> Option<Box<dyn Iterator<Item = &String> + '_>> { None }
     pub fn has_item(&self, _item: &ItemType) -> bool { false }
     pub fn index_of_item(&self, _item: &ItemType) -> Result<Option<usize>, Box<dyn Error>> { 
-        Err(Box::new(ThingError::NotAnItemList))
+        Err(Box::new(ItemError::NotAnItemList))
     }
     pub fn key_of_item(&self, _item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
-        Err(Box::new(ThingError::NotAnItemHash))
+        Err(Box::new(ItemError::NotAnItemHash))
     }
     pub fn item_by_index(&self, _index: usize) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemList))
+        Err(Box::new(ItemError::NotAnItemList))
     }
     pub fn item_by_key(&self, _key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ThingError::NotAnItemHash))
+        Err(Box::new(ItemError::NotAnItemHash))
     }
 
     pub fn to_string(&self) -> String {
