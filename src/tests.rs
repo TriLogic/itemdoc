@@ -4,8 +4,8 @@ mod tests {
     use crate::itemdoc::core::lists::*;
     use crate::itemdoc::core::hashes::*;
     use crate::itemdoc::core::items::ItemType;
-    use crate::itemdoc::output::core::*;
-    use crate::itemdoc::output::formats::*;
+    use crate::itemdoc::exports::core::*;
+    use crate::itemdoc::exports::formats::*;
 
     #[test]
     fn test_add_null_to_item_list() {

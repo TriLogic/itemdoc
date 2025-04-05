@@ -9,7 +9,7 @@ pub mod itemdoc {
         pub mod hashes;
         pub mod utility;
     }
-    pub mod output {
+    pub mod exports {
         pub mod core;
         pub mod formats;
         pub mod json {

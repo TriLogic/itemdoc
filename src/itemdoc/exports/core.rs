@@ -13,20 +13,20 @@ pub enum ContextError {
 impl std::error::Error for ContextError {}
 
 #[derive(Debug)]
-pub enum OutputError {
+pub enum ExportError {
     Io(std::io::Error),
     Context(ContextError),
 }
 
-impl From<std::io::Error> for OutputError {
+impl From<std::io::Error> for ExportError {
     fn from(err: std::io::Error) -> Self {
-        OutputError::Io(err)
+        ExportError::Io(err)
     }
 }
 
-impl From<ContextError> for OutputError {
+impl From<ContextError> for ExportError {
     fn from(err: ContextError) -> Self {
-        OutputError::Context(err)
+        ExportError::Context(err)
     }
 }
 
@@ -77,12 +77,12 @@ pub enum OutputType {
     HashType,
 }
 
-pub struct SimpleOutputContext {
+pub struct SimpleExportContext {
     stk_type: Vec<OutputType>,
     stk_count: Vec<usize>
 }
 
-impl SimpleOutputContext {
+impl SimpleExportContext {
     pub fn new() -> Self {
         Self {
             stk_type: Vec::new(),
@@ -91,14 +91,14 @@ impl SimpleOutputContext {
     }
 }
 
-pub struct StructuredOutputContext {
-    context: SimpleOutputContext,
+pub struct StructuredExportContext {
+    context: SimpleExportContext,
     str_indent: Rc<[u8]>,
     stk_indent: Vec<Rc<[u8]>>,
     vec_empty: Rc<[u8]>,
 }
 
-impl StructuredOutputContext {
+impl StructuredExportContext {
     pub fn new(indent: Option<String>) -> Self {
 
         let indent_bytes = match indent {
@@ -107,7 +107,7 @@ impl StructuredOutputContext {
         };
 
         Self {
-            context: SimpleOutputContext::new(),
+            context: SimpleExportContext::new(),
             str_indent: indent_bytes,
             stk_indent: Vec::new(),
             vec_empty: Rc::default(),
@@ -152,7 +152,7 @@ impl StructuredOutputContext {
         result
     }
 
-    pub fn write_outdent(&self, writer: &mut Box<dyn Write, >) -> Result<(), OutputError> {
+    pub fn write_outdent(&self, writer: &mut Box<dyn Write, >) -> Result<(), ExportError> {
         let outdent = self.get_outdent_vec().clone();
         if outdent.len() > 0 {
             writer.write(&outdent.clone())?;
@@ -160,7 +160,7 @@ impl StructuredOutputContext {
         Ok(())
     }
     
-    pub fn write_indent(&self, writer: &mut Box<dyn Write>) -> Result<(), OutputError> {
+    pub fn write_indent(&self, writer: &mut Box<dyn Write>) -> Result<(), ExportError> {
         let indent = self.get_outdent_vec();
         if indent.len() > 0 {
             writer.write_all(indent)?;
@@ -170,7 +170,7 @@ impl StructuredOutputContext {
 
 }
 
-pub trait OutputContext {
+pub trait ExportContext {
     fn get_stack_level(&self) -> usize;
     fn get_item_count(&self) -> usize;
     fn incr_item_count(&mut self);
@@ -189,7 +189,7 @@ pub trait OutputContext {
     fn is_within_hash(&mut self) -> bool;
 }
 
-impl OutputContext for SimpleOutputContext {
+impl ExportContext for SimpleExportContext {
 
     fn get_stack_level(&self) -> usize { self.stk_type.len() }
 
@@ -285,7 +285,7 @@ impl OutputContext for SimpleOutputContext {
 
 }
 
-impl OutputContext for StructuredOutputContext {
+impl ExportContext for StructuredExportContext {
 
     fn get_stack_level(&self) -> usize { self.context.get_stack_level() }
     fn get_item_count(&self) -> usize { self.context.get_item_count() }
@@ -325,26 +325,26 @@ impl OutputContext for StructuredOutputContext {
 }
 
 pub trait ItemOutput {
-    fn list_open(&mut self) -> Result<usize, OutputError>;
-    fn list_begin_next(&mut self) -> Result<(), OutputError>;
-    fn list_write_null(&mut self) -> Result<(), OutputError>;
-    fn list_write_bool(&mut self, value: bool) -> Result<(), OutputError>;
-    fn list_write_number(&mut self, value: f64) -> Result<(), OutputError>;
-    fn list_write_string(&mut self, value: &String) -> Result<(), OutputError>;
-    fn list_write_empty_list(&mut self) -> Result<(), OutputError>;
-    fn list_write_empty_hash(&mut self) -> Result<(), OutputError>;
-    fn list_close(&mut self) -> Result<usize, OutputError>;
+    fn list_open(&mut self) -> Result<usize, ExportError>;
+    fn list_begin_next(&mut self) -> Result<(), ExportError>;
+    fn list_write_null(&mut self) -> Result<(), ExportError>;
+    fn list_write_bool(&mut self, value: bool) -> Result<(), ExportError>;
+    fn list_write_number(&mut self, value: f64) -> Result<(), ExportError>;
+    fn list_write_string(&mut self, value: &String) -> Result<(), ExportError>;
+    fn list_write_empty_list(&mut self) -> Result<(), ExportError>;
+    fn list_write_empty_hash(&mut self) -> Result<(), ExportError>;
+    fn list_close(&mut self) -> Result<usize, ExportError>;
 
-    fn hash_open(&mut self) -> Result<usize, OutputError>;
-    fn hash_begin_next(&mut self, key: &String) -> Result<(), OutputError>;
-    fn hash_write_key(&mut self, key: &String) -> Result<(), OutputError>;
-    fn hash_write_null(&mut self, key: &String) -> Result<(), OutputError>;
-    fn hash_write_bool(&mut self, key: &String, value: bool) -> Result<(), OutputError>;
-    fn hash_write_string(&mut self, key: &String, value: &String) -> Result<(), OutputError>;
-    fn hash_write_number(&mut self, key: &String, value: f64) -> Result<(), OutputError>;
-    fn hash_write_empty_list(&mut self, key: &String) -> Result<(), OutputError>;
-    fn hash_write_empty_hash(&mut self, key: &String) -> Result<(), OutputError>;
-    fn hash_close(&mut self) -> Result<usize, OutputError>;
+    fn hash_open(&mut self) -> Result<usize, ExportError>;
+    fn hash_begin_next(&mut self, key: &String) -> Result<(), ExportError>;
+    fn hash_write_key(&mut self, key: &String) -> Result<(), ExportError>;
+    fn hash_write_null(&mut self, key: &String) -> Result<(), ExportError>;
+    fn hash_write_bool(&mut self, key: &String, value: bool) -> Result<(), ExportError>;
+    fn hash_write_string(&mut self, key: &String, value: &String) -> Result<(), ExportError>;
+    fn hash_write_number(&mut self, key: &String, value: f64) -> Result<(), ExportError>;
+    fn hash_write_empty_list(&mut self, key: &String) -> Result<(), ExportError>;
+    fn hash_write_empty_hash(&mut self, key: &String) -> Result<(), ExportError>;
+    fn hash_close(&mut self) -> Result<usize, ExportError>;
 }
 
 pub mod stringhelp {
