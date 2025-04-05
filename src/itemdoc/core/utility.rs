@@ -16,9 +16,62 @@ impl From<bool> for RustType {
     }
 }
 
+impl From<i8> for RustType {
+    fn from(n: i8) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<i16> for RustType {
+    fn from(n: i16) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<i32> for RustType {
+    fn from(n: i32) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<i64> for RustType {
+    fn from(n: i64) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+
+impl From<u8> for RustType {
+    fn from(n: u8) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<u16> for RustType {
+    fn from(n: u16) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<u32> for RustType {
+    fn from(n: u32) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+impl From<u64> for RustType {
+    fn from(n: u64) -> Self {
+        RustType::Number(n as f64)
+    }
+}
+
+impl From<f32> for RustType {
+    fn from(n: f32) -> Self {
+        RustType::Number(n as f64)
+    }
+}
 impl From<f64> for RustType {
     fn from(n: f64) -> Self {
         RustType::Number(n)
+    }
+}
+
+impl From<usize> for RustType {
+    fn from(n: usize) -> Self {
+        RustType::Number(n as f64)
     }
 }
 
