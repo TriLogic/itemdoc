@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use super::items::*;
 use super::utility::*;
 
@@ -17,6 +15,22 @@ impl ItemString {
         me
     }
 
+
+    pub fn is_null(&self) -> bool { false }
+    pub fn is_boolean(&self) -> bool { false }
+    pub fn is_number(&self) -> bool { false }
+    pub fn is_string(&self) -> bool { true }
+    pub fn is_list(&self) -> bool { false }
+    pub fn is_hash(&self) -> bool { false }
+    pub fn is_container(&self) -> bool { false }
+
+
+    pub fn has_item(&self, _item: &ItemType) -> bool { false }
+    pub fn get_item<'a, L: Into<ContainerKey<'a>>>(&'a self, _lookup: L) -> Result<Option<&'a ItemType>, ItemError> {
+        Err(ItemError::NotAnItemContainer)
+    }
+
+
     pub fn add_null<'a>(&mut self, _key: Option<&'a str>) -> Result<&mut Self, ItemError> {
         Err(ItemError::NotAnItemContainer)
     }
@@ -30,33 +44,27 @@ impl ItemString {
         Err(ItemError::NotAnItemContainer)
     }
 
-    pub fn is_null(&self) -> bool { false }
-    pub fn is_boolean(&self) -> bool { false }
-    pub fn is_number(&self) -> bool { false }
-    pub fn is_string(&self) -> bool { true }
-    pub fn is_list(&self) -> bool { false }
-    pub fn is_hash(&self) -> bool { false }
-    pub fn is_container(&self) -> bool { false }
-    pub fn count(&self) -> usize { 0 }
-    pub fn has_index(&self, _index: usize) -> bool { false }
-    pub fn get_indices(&self) -> Option<Box<dyn Iterator<Item = usize> + '_>> { None }
-    pub fn has_key(&self, _key: &str) -> bool { false }
-    pub fn get_keys(&self) -> Option<Box<dyn Iterator<Item = &String> + '_>> { None }
-    pub fn has_item(&self, _item: &ItemType) -> bool { false }
-    pub fn index_of_item(&self, _item: &ItemType) -> Result<Option<usize>, Box<dyn Error>> { 
-        Err(Box::new(ItemError::NotAnItemList))
-    }
-    pub fn key_of_item(&self, _item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
-        Err(Box::new(ItemError::NotAnItemHash))
-    }
-    pub fn item_by_index(&self, _index: usize) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemList))
-    }
-    pub fn item_by_key(&self, _key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemHash))
+
+    pub fn remove_item<'a>(&mut self, _key: ContainerKey<'a>) -> Result<Option<ItemType>, ItemError> {
+        Err(ItemError::NotAnItemContainer)
     }
 
-    pub fn to_string(&self) -> String {
+
+    pub fn count(&self) -> usize { 0 }
+
+
+    pub fn has_key<'a, K: Into<ContainerKey<'a>>>(&self, _key: K) -> bool {
+        false
+    }
+    pub fn get_key<'a>(&'a self, _item: &ItemType) -> Result<Option<ContainerKey<'a>>, ItemError> {
+        Err(ItemError::NotAnItemContainer)
+    }
+    pub fn get_keys<'a>(&'a self) -> Result<Vec<ContainerKey<'a>>, ItemError> {
+        Err(ItemError::NotAnItemContainer)
+    }
+
+
+   pub fn to_string(&self) -> String {
         self.value.clone()
     }
 
