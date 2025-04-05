@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::error::Error;
 
 use super::items::*;
+use super::utility::*;
 
 #[derive(PartialEq)]
 pub struct ItemHash {
@@ -74,36 +75,59 @@ impl ItemHash {
         self.items.len() 
     }
 
-    pub fn has_index(&self, _index: usize) -> bool {
-        false
+    pub fn has_key<'a, K: Into<LookupValue<'a>>>(&self, key: K) -> bool {
+        match key.into() {
+            LookupValue::Key(k) => self.items.contains_key(k),
+            LookupValue::Idx(_) => false,
+        }
     }
-    pub fn has_key(&self, key: &str) -> bool {
-        self.items.contains_key(key)
+    pub fn get_key<'a>(&'a self, item: &ItemType) -> Result<Option<LookupValue<'a>>, ItemError> {
+        for (key, value) in &self.items {
+            if value == item {
+                return Ok(Some(LookupValue::Key(key.as_str())));
+            }
+        }
+        Ok(None)
+    }
+    pub fn get_keys<'a>(&'a self) -> Result<Vec<LookupValue<'a>>, ItemError> {
+        let keys = self.items
+            .keys()
+            .map(|k| LookupValue::Key(k.as_str()))
+            .collect();
+        Ok(keys)
     }
 
     pub fn has_item(&self, item: &ItemType) -> bool {
         self.items.values().any(|value| value == item)  
     }
-    pub fn index_of_item(&self, _item: &ItemType) -> Result<Option<usize>, Box<dyn Error>> { 
-        Err(Box::new(ItemError::NotAnItemList))
-    }
-    pub fn key_of_item(&self, item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
-        Ok(self.items.iter()
-            .find_map(|(key, value)| if value == item { Some(key) } else { None }))
-    }
-
-    pub fn get_indices(&self) -> Option<Box<dyn Iterator<Item = usize> + '_>> {
-        None
-    }
-    pub fn get_keys(&self) -> Option<Box<dyn Iterator<Item = &String> + '_>> {
-        Some(Box::new(self.items.keys()))
+    pub fn get_item<'a, L: Into<LookupValue<'a>>>(&'a self, lookup: L) -> Result<Option<&'a ItemType>, ItemError> {
+        match lookup.into() {
+            LookupValue::Key(k) => Ok(self.items.get(k)),
+            _ => Err(ItemError::NotAnItemList),
+        }
     }
 
-    pub fn item_by_index(&self, _index: usize) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemList))
+    pub fn add_value<'a, V: Into<RustType>>(
+        &mut self,
+        value: V,
+        key: Option<&'a str>,
+    ) -> Result<(), ItemError> {
+        match key {
+            Some(k) => {
+                self.items.insert(k.to_string(), value.into().into_item_type());
+                Ok(())
+            }
+            None => Err(ItemError::NotAnItemList),
+        }
     }
-    pub fn item_by_key(&self, _key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        Ok(self.items.get(_key))
+
+    pub fn remove_item<'a>(&mut self, lookup: LookupValue<'a>) -> Result<Option<ItemType>, ItemError> {
+        match lookup {
+            LookupValue::Key(k) => {
+                Ok(self.items.remove(k))
+            },
+            _ => Err(ItemError::NotAnItemList),
+        }
     }
 
     pub fn last_mut(&mut self, key: &String) -> Option<&mut ItemType> {

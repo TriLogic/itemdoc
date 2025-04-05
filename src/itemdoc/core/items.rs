@@ -2,6 +2,8 @@ use std::result::Result;
 use std::error::Error;
 use std::fmt;
 
+use super::utility::*;
+
 #[derive(Debug)]
 #[derive(Copy, Clone)]
 pub enum ItemError {
@@ -9,6 +11,7 @@ pub enum ItemError {
     NotAnItemHash,
     NotAnItemContainer,
     ItemAdditionFailed,
+    ItemNotFound,
 }
 
 impl fmt::Display for ItemError {
@@ -17,12 +20,31 @@ impl fmt::Display for ItemError {
             ItemError::NotAnItemList => write!(f, "Not an item list!"),
             ItemError::NotAnItemHash => write!(f, "Not an item hash!"),
             ItemError::NotAnItemContainer => write!(f, "Not an item container!"),
-            ItemError::ItemAdditionFailed => write!(f, "Item addition failure!")
+            ItemError::ItemAdditionFailed => write!(f, "Item addition failure!"),
+            ItemError::ItemNotFound => write!(f, "Item not found!"),
         }
     }
 }
 
 impl std::error::Error for ItemError {}
+
+#[derive(PartialEq)]
+pub enum LookupValue<'a> {
+    Idx(usize),
+    Key(&'a str),
+}
+
+impl<'a> From<usize> for LookupValue<'a> {
+    fn from(index: usize) -> Self {
+        LookupValue::Idx(index)
+    }
+}
+
+impl<'a> From<&'a str> for LookupValue<'a> {
+    fn from(key: &'a str) -> Self {
+        LookupValue::Key(key)
+    }
+}
 
 #[derive(PartialEq)]
 pub enum ItemType {
@@ -33,6 +55,7 @@ pub enum ItemType {
     TList(super::lists::ItemList),
     THash(super::hashes::ItemHash),
 }
+
 
 impl ItemType {
 
@@ -77,6 +100,37 @@ impl ItemType {
             ItemType::TList(list) => list.add_hash(key),
             ItemType::THash(hash) => hash.add_hash(key),
             _ => Err(Box::new(ItemError::NotAnItemContainer)),
+        }
+    }
+
+    pub fn has_item(&self, item: &ItemType) -> bool {
+        match self {
+            ItemType::TList(mapped) => mapped.has_item(item),
+            ItemType::THash(mapped) => mapped.has_item(item),
+            _ => false,
+        }        
+    }
+    pub fn get_item<'a, L: Into<LookupValue<'a>>>(&'a self, lookup: L) -> Result<Option<&'a ItemType>, ItemError> {
+        match self {
+            ItemType::TList(list) => list.get_item(lookup),
+            ItemType::THash(hash) => hash.get_item(lookup),
+            _ => Err(ItemError::NotAnItemContainer),
+        }
+    }
+
+    pub fn add_value<'a, V: Into<RustType>>(&mut self, value: V, key: Option<&'a str>) -> Result<(), ItemError> {
+        match self {
+            ItemType::TList(list) => list.add_value(value, key),
+            ItemType::THash(hash) => hash.add_value(value, key),
+            _ => Err(ItemError::NotAnItemContainer),
+        }
+    }
+
+    pub fn remove_item<'a>(&mut self, lookup: LookupValue<'a>) -> Result<Option<ItemType>, ItemError> {
+        match self {
+            ItemType::TList(list) => list.remove_item(lookup),
+            ItemType::THash(hash) => hash.remove_item(lookup),
+            _ => Err(ItemError::NotAnItemContainer),
         }
     }
 
@@ -135,7 +189,6 @@ impl ItemType {
         }        
     }
 
-
     pub fn count(&self) -> usize { 
         match self {
             ItemType::TList(mapped) => mapped.count(),
@@ -144,63 +197,27 @@ impl ItemType {
         }        
     }
 
-    pub fn has_index(&self, index: usize) -> bool {
+    pub fn has_key<'a, K: Into<LookupValue<'a>>>(&self, key: K) -> bool {
         match self {
-            ItemType::TList(mapped) => mapped.has_index(index),
-            _ => false,
-        }        
-    }
-    pub fn get_indices(&self) -> Option<Box<dyn Iterator<Item = usize> + '_>> {
-        match self {
-            ItemType::THash(mapped) => mapped.get_indices(),
-            _ => None,
-        }        
-    }
-    
-    pub fn has_key(&self, key: &str) -> bool {
-        match self {
+            ItemType::TList(mapped) => mapped.has_key(key),
             ItemType::THash(mapped) => mapped.has_key(key),
             _ => false,
-        }     
+        }        
     }
-    pub fn get_keys(&self) -> Option<Box<dyn Iterator<Item = &String> + '_>> {
+    pub fn get_key<'a>(&'a self, item: &ItemType) -> Result<Option<LookupValue<'a>>, ItemError> {
         match self {
+            ItemType::TList(mapped) => mapped.get_key(item),
+            ItemType::THash(mapped) => mapped.get_key(item),
+            _ => Err(ItemError::NotAnItemContainer),
+        }        
+    }
+    pub fn get_keys<'a>(&'a self) -> Result<Vec<LookupValue<'a>>, ItemError> {
+        match self {
+            ItemType::TList(mapped) => mapped.get_keys(),
             ItemType::THash(mapped) => mapped.get_keys(),
-            _ => None,
+            _ => Err(ItemError::NotAnItemContainer),
         }        
     }
 
-    pub fn has_item(&self, item: &ItemType) -> bool {
-        match self {
-            ItemType::TList(mapped) => mapped.has_item(item),
-            ItemType::THash(mapped) => mapped.has_item(item),
-            _ => false,
-        }        
-    }
-    pub fn index_of_item(&self, item: &ItemType) -> Result<Option<usize>, Box<dyn Error>> { 
-        match self {
-            ItemType::TList(mapped) => mapped.index_of_item(item),
-            _ => Err(Box::new(ItemError::NotAnItemList)),
-        }        
-    }
-    pub fn key_of_item(&self, item: &ItemType) -> Result<Option<&String>, Box<dyn Error>> { 
-        match self {
-            ItemType::THash(mapped) => mapped.key_of_item(item),
-            _ => Err(Box::new(ItemError::NotAnItemHash)),
-        }
-    }
-
-    pub fn item_by_index(&self, index: usize) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        match self {
-            ItemType::TList(mapped) => mapped.item_by_index(index),
-            _ => Err(Box::new(ItemError::NotAnItemList)),
-        }        
-    }
-    pub fn item_by_key(&self, key: &str) -> Result<Option<&ItemType>, Box<dyn Error>> {
-        match self {
-            ItemType::THash(mapped) => mapped.item_by_key(key),
-            _ => Err(Box::new(ItemError::NotAnItemHash)),
-        }        
-    }
 
 }

@@ -7,6 +7,7 @@ pub mod itemdoc {
         pub mod strings;
         pub mod lists;
         pub mod hashes;
+        pub mod utility;
     }
     pub mod output {
         pub mod core;
