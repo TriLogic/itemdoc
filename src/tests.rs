@@ -17,15 +17,15 @@ mod tests {
     #[test]
     fn test_add_number_to_item_list() {
         let mut list = ItemList::new();
-        list.add_number(Some(42.0),None).unwrap();
+        list.add_value(42.0,None).unwrap();
         assert_eq!(list.to_string(), "[42]");
     }
 
     #[test]
     fn test_add_bools_to_item_list() {
         let mut list = ItemList::new();
-        list.add_boolean(Some(true),None).unwrap();
-        list.add_boolean(Some(false),None).unwrap();
+        list.add_value(true,None).unwrap();
+        list.add_value(false, None).unwrap();
         assert_eq!(list.to_string(), "[true,false]");
     }
 
@@ -33,7 +33,7 @@ mod tests {
     fn test_add_string_to_item_list() {
         let value = "Hello World!";
         let mut list = ItemList::new();
-        list.add_string(Some(value.to_string()), None).unwrap();
+        list.add_value(value, None).unwrap();
         assert_eq!(list.to_string(), "[Hello World!]");
     }
 
@@ -66,42 +66,42 @@ mod tests {
     #[test]
     fn test_add_null_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_null(Some("Null".to_string())).unwrap();
+        hash.add_null(Some("Null")).unwrap();
         assert_eq!(hash.to_string(), "{\"Null\":null}");
     }
 
     #[test]
     fn test_add_boolean_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_boolean(Some(true), Some("True".to_string())).unwrap();
+        hash.add_value(true, Some("True")).unwrap();
         assert_eq!(hash.to_string(), "{\"True\":true}");
     }
 
     #[test]
     fn test_add_number_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_number(Some(42.0), Some("Number".to_string())).unwrap();
+        hash.add_value(42.0, Some("Number")).unwrap();
         assert_eq!(hash.to_string(), "{\"Number\":42}");
     }
 
     #[test]
     fn test_add_string_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_string(Some("Hello World!".to_string()), Some("String".to_string())).unwrap();
+        hash.add_value("Hello World!", Some("String")).unwrap();
         assert_eq!(hash.to_string(), "{\"String\":Hello World!}");
     }
 
     #[test]
     fn test_add_list_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_list(Some("List".to_string())).unwrap();
+        hash.add_list(Some("List")).unwrap();
         assert_eq!(hash.to_string(), "{\"List\":[]}");
     }
 
     #[test]
     fn test_add_hash_to_item_hash() {
         let mut hash = ItemHash::new();
-        hash.add_hash(Some("Hash".to_string())).unwrap();
+        hash.add_hash(Some("Hash")).unwrap();
         assert_eq!(hash.to_string(), "{\"Hash\":{}}");
     }
 
@@ -109,12 +109,12 @@ mod tests {
     fn test_add_all_to_item_hash() {
         let mut hash = ItemHash::new();
 
-        hash.add_null(Some("Null".to_string())).unwrap();
-        hash.add_boolean(Some(true), Some("True".to_string())).unwrap();
-        hash.add_number(Some(42.0), Some("Number".to_string())).unwrap();
-        hash.add_string(Some("Hello World!".to_string()), Some("String".to_string())).unwrap();
-        hash.add_list(Some("List".to_string())).unwrap();
-        hash.add_hash(Some("Hash".to_string())).unwrap();
+        hash.add_null(Some("Null")).unwrap();
+        hash.add_value(true, Some("True")).unwrap();
+        hash.add_value(42.0, Some("Number")).unwrap();
+        hash.add_value("Hello World!", Some("String")).unwrap();
+        hash.add_list(Some("List")).unwrap();
+        hash.add_hash(Some("Hash")).unwrap();
 
         assert_eq!(hash.has_key("Null"),true);
         assert!( hash.get_item("Null").is_ok_and(|x| matches!(x, Some(ItemType::TNull(_)))) );

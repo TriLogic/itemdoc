@@ -59,50 +59,6 @@ pub enum ItemType {
 
 impl ItemType {
 
-    pub fn add_null(&mut self, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        match self {
-            ItemType::TList(me) => { me.add_null(key)?; Ok(self) },
-            ItemType::THash(me) => { me.add_null(key)?; Ok(self) },
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-    pub fn add_boolean(&mut self, value: Option<bool>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        match self {
-            ItemType::TList(me) => { me.add_boolean(value, key)?; Ok(self) },
-            ItemType::THash(me) => { me.add_boolean(value, key)?; Ok(self) },
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-    pub fn add_number(&mut self, value: Option<f64>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        match self {
-            ItemType::TList(me) => { me.add_number(value, key)?; Ok(self) },
-            ItemType::THash(me) => { me.add_number(value, key)?; Ok(self) },
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-    pub fn add_string(&mut self, value: Option<String>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        match self {
-            ItemType::TList(me) => { me.add_string(value, key)?; Ok(self) },
-            ItemType::THash(me) => { me.add_string(value, key)?; Ok(self) },
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-    pub fn add_list(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        match self {
-            ItemType::TList(list) => list.add_list(key),
-            ItemType::THash(hash) => hash.add_list(key),
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-
-    pub fn add_hash(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        match self {
-            ItemType::TList(list) => list.add_hash(key),
-            ItemType::THash(hash) => hash.add_hash(key),
-            _ => Err(Box::new(ItemError::NotAnItemContainer)),
-        }
-    }
-
     pub fn has_item(&self, item: &ItemType) -> bool {
         match self {
             ItemType::TList(mapped) => mapped.has_item(item),
@@ -118,11 +74,32 @@ impl ItemType {
         }
     }
 
+    pub fn add_null<'a>(&mut self, key: Option<&'a str>) -> Result<&mut Self, Box<dyn Error>> {
+        match self {
+            ItemType::TList(me) => { me.add_null(key)?; Ok(self) },
+            ItemType::THash(me) => { me.add_null(key)?; Ok(self) },
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
+        }
+    }
     pub fn add_value<'a, V: Into<RustType>>(&mut self, value: V, key: Option<&'a str>) -> Result<(), ItemError> {
         match self {
             ItemType::TList(list) => list.add_value(value, key),
             ItemType::THash(hash) => hash.add_value(value, key),
             _ => Err(ItemError::NotAnItemContainer),
+        }
+    }
+    pub fn add_list<'a>(&mut self, key: Option<&'a str>) -> Result<&mut ItemType, Box<dyn Error>> {
+        match self {
+            ItemType::TList(list) => list.add_list(key),
+            ItemType::THash(hash) => hash.add_list(key),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
+        }
+    }
+    pub fn add_hash<'a>(&mut self, key: Option<&'a str>) -> Result<&mut ItemType, Box<dyn Error>> {
+        match self {
+            ItemType::TList(list) => list.add_hash(key),
+            ItemType::THash(hash) => hash.add_hash(key),
+            _ => Err(Box::new(ItemError::NotAnItemContainer)),
         }
     }
 

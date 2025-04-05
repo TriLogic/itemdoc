@@ -24,49 +24,6 @@ impl ItemList {
     pub fn is_hash(&self) -> bool { false }
     pub fn is_container(&self) -> bool { true }
 
-    fn add_item(&mut self, item: ItemType, key: Option<String>) -> Result<(), Box<dyn Error>> {
-        if key.is_some() {
-            return Err(Box::new(ItemError::NotAnItemHash));
-        }
-        self.items.push(item);
-        Ok(())
-    }
-
-    pub fn add_null(&mut self, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::nulls::ItemNull::new(), key)?;
-        Ok(self)
-    }
-    pub fn add_boolean(&mut self, value: Option<bool>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::booleans::ItemBoolean::new(value), key)?;
-        Ok(self)
-    }
-    pub fn add_number(&mut self, value: Option<f64>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::numbers::ItemNumber::new(value), key)?;
-        Ok(self)
-    }
-    pub fn add_string(&mut self, value: Option<String>, key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        self.add_item(super::strings::ItemString::new(value), key)?;
-        Ok(self)
-    }
-    pub fn add_list(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        if key.is_some() {
-            return Err(Box::new(ItemError::NotAnItemHash));
-        }
-        let list = ItemList::new();
-        self.items.push(list);
-        self.items.last_mut()
-            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
-    }
-    pub fn add_hash(&mut self, key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        if key.is_some() {
-            return Err(Box::new(ItemError::NotAnItemHash));
-        }
-        let hash = super::hashes::ItemHash::new();
-        self.items.push(hash);
-        self.items.last_mut()
-            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
-    }
-
     pub fn count(&self) -> usize { 
         self.items.len() 
     }
@@ -77,12 +34,14 @@ impl ItemList {
             LookupValue::Key(_) => false,
         }
     }
+
     pub fn get_key<'a>(&'a self, item: &ItemType) -> Result<Option<LookupValue<'a>>, ItemError> {
         match self.items.iter().position(|v| v == item) {
             Some(index) => Ok(Some(LookupValue::Idx(index))),
             None => Ok(None),
         }
     }
+
     pub fn get_keys<'a>(&'a self) -> Result<Vec<LookupValue<'a>>, ItemError> {
         let keys = self.items
         .iter()
@@ -95,6 +54,7 @@ impl ItemList {
     pub fn has_item(&self, item: &ItemType) -> bool {
         self.items.iter().any(|value| value == item) 
     }
+
     pub fn get_item<'a, L: Into<LookupValue<'a>>>(&'a self, lookup: L) -> Result<Option<&'a ItemType>, ItemError> {
         match lookup.into() {
             LookupValue::Idx(i) => Ok(self.items.get(i)),
@@ -102,20 +62,44 @@ impl ItemList {
         }
     }
 
-
-    pub fn add_value<'a, V: Into<RustType>>(&mut self, value: V, key: Option<&'a str>,
-    ) -> Result<(), ItemError> {
-        let item = value.into().into_item_type();
-
-        match key {
-            None => {
-                self.items.push(item);
-                Ok(())
-            }
-            Some(_) => Err(ItemError::NotAnItemList),
+    pub fn add_null<'a>(&mut self, key: Option<&'a str>) -> Result<&mut Self, ItemError> {
+        if key.is_some() {
+            Err(ItemError::NotAnItemHash)
+        } else {
+            self.items.push(super::nulls::ItemNull::new());
+            Ok(self)
         }
     }
 
+    pub fn add_value<'a, V: Into<RustType>>(&mut self, value: V, key: Option<&'a str>) -> Result<(), ItemError> {
+        if key.is_some() {
+            Err(ItemError::NotAnItemHash)
+        } else {
+            let item = value.into().into_item_type();
+            self.items.push(item);
+            Ok(())
+        }
+    }
+
+    pub fn add_list<'a>(&mut self, key: Option<&'a str>) -> Result<&mut ItemType, Box<dyn Error>> {
+        if key.is_some() {
+            return Err(Box::new(ItemError::NotAnItemHash));
+        }
+        let list = ItemList::new();
+        self.items.push(list);
+        self.items.last_mut()
+            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
+    }
+
+    pub fn add_hash<'a>(&mut self, key: Option<&'a str>) -> Result<&mut ItemType, Box<dyn Error>> {
+        if key.is_some() {
+            return Err(Box::new(ItemError::NotAnItemHash));
+        }
+        let hash = super::hashes::ItemHash::new();
+        self.items.push(hash);
+        self.items.last_mut()
+            .ok_or_else(|| Box::<dyn Error>::from(ItemError::ItemAdditionFailed))
+    }
 
     pub fn remove_item<'a>(&mut self, lookup: LookupValue<'a>) -> Result<Option<ItemType>, ItemError> {
         match lookup {

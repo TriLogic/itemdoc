@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use super::items::*;
+use super::utility::*;
 
 #[derive(PartialEq)]
 pub struct ItemString {
@@ -16,23 +17,17 @@ impl ItemString {
         me
     }
 
-    //pub fn add_item(&mut self, _item: ItemType, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-    //    Err(Box::new(ItemError::NotAnItemContainer))
-    //}
-    pub fn add_null(&mut self, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemContainer))
+    pub fn add_null<'a>(&mut self, _key: Option<&'a str>) -> Result<&mut Self, ItemError> {
+        Err(ItemError::NotAnItemContainer)
     }
-    pub fn add_number(&mut self, _value: Option<f64>, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemContainer))
+    pub fn add_value<'a, V: Into<RustType>>(&mut self, _value: V, _key: Option<&'a str>) -> Result<(), ItemError> {
+        Err(ItemError::NotAnItemContainer)
     }
-    pub fn add_string(&mut self, _value: Option<String>, _key: Option<String>) -> Result<&mut Self, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemContainer))
+    pub fn add_list<'a>(&mut self, _key: Option<&'a str>) -> Result<&mut ItemType, ItemError> {
+        Err(ItemError::NotAnItemContainer)
     }
-    pub fn add_list(&mut self, _key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemContainer))
-    }
-    pub fn add_hash(&mut self, _key: Option<String>) -> Result<&mut ItemType, Box<dyn Error>> {
-        Err(Box::new(ItemError::NotAnItemContainer))
+    pub fn add_hash<'a>(&mut self, _key: Option<&'a str>) -> Result<&mut ItemType, ItemError> {
+        Err(ItemError::NotAnItemContainer)
     }
 
     pub fn is_null(&self) -> bool { false }
